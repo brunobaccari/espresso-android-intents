@@ -1,0 +1,85 @@
+name: Android tests
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verificar arquivos versionados
+        run: |
+          tracked=$(git ls-files --cached --ignored --exclude-standard)
+          test -z "$tracked" || { printf '%s\n' "$tracked"; exit 1; }
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: python scripts/summary.py --self-test
+      - run: cp .env.example .env
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - run: python -m pip install -r requirements.txt
+      - run: python prepare_app.py
+      - name: Compilar app e testes
+        run: |
+          chmod +x .upstream/ui/espresso/IntentsBasicSample/gradlew
+          .upstream/ui/espresso/IntentsBasicSample/gradlew -p .upstream/ui/espresso/IntentsBasicSample assembleDebug assembleDebugAndroidTest --no-daemon --max-workers=2
+      - name: Habilitar KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        id: tests
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: .upstream/ui/espresso/IntentsBasicSample/gradlew -p .upstream/ui/espresso/IntentsBasicSample connectedDebugAndroidTest --no-daemon --max-workers=2
+      - name: Recolher resultados de instrumentação
+        if: always()
+        run: |
+          mkdir -p results
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+          build = Path('.upstream/ui/espresso/IntentsBasicSample/app/build')
+          for index, source in enumerate(build.glob('outputs/androidTest-results/connected/**/*.xml')):
+              shutil.copy2(source, Path('results') / f'junit-{index}.xml')
+          source = build / 'reports/androidTests/connected'
+          if source.exists():
+              shutil.copytree(source, 'results/html', dirs_exist_ok=True)
+          PY
+      - name: Resumo dos testes
+        if: always()
+        env:
+          TEST_OUTCOME: ${{ steps.tests.outcome }}
+          EXPECTED_TESTS: '5'
+          JUNIT_PATTERN: 'results/**/junit*.xml'
+          TEST_SCOPE: Android 34 / IntentsBasicSample oficial / Espresso. ACTION_CALL interceptado; nenhuma chamada telefônica real.
+        run: python scripts/summary.py
+      - uses: actions/upload-artifact@v4
+        id: artifact
+        if: always()
+        with:
+          name: android-results
+          path: results/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Link dos resultados
+        if: always()
+        env:
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        run: |
+          if [ -n "$ARTIFACT_URL" ]; then
+            printf '\n[Baixar resultados](%s)\n' "$ARTIFACT_URL" >> "$GITHUB_STEP_SUMMARY"
+          fi
