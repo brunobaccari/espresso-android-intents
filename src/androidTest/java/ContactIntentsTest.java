@@ -31,6 +31,9 @@ public class ContactIntentsTest {
     @Before public void openDialer() {
         Intents.init();
         screen = ActivityScenario.launch(DialerActivity.class);
+        intended(allOf(hasAction(Intent.ACTION_MAIN),
+                hasCategory(Intent.CATEGORY_LAUNCHER),
+                hasComponent(DialerActivity.class.getName())));
         intending(hasAction(Intent.ACTION_CALL)).respondWith(new ActivityResult(Activity.RESULT_OK, null));
     }
 
