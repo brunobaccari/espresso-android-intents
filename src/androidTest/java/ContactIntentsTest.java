@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Instrumentation.ActivityResult;
 import android.content.Intent;
 import android.net.Uri;
+import java.util.Collections;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.intent.Intents;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -32,7 +33,7 @@ public class ContactIntentsTest {
         Intents.init();
         screen = ActivityScenario.launch(DialerActivity.class);
         intended(allOf(hasAction(Intent.ACTION_MAIN),
-                hasCategory(Intent.CATEGORY_LAUNCHER),
+                hasCategories(Collections.singleton(Intent.CATEGORY_LAUNCHER)),
                 hasComponent(DialerActivity.class.getName())));
         intending(hasAction(Intent.ACTION_CALL)).respondWith(new ActivityResult(Activity.RESULT_OK, null));
     }
