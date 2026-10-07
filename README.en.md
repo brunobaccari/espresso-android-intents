@@ -35,3 +35,5 @@ Preparation verifies the SHA and injects `src/androidTest/java/ContactIntentsTes
 Skipped cases, a count different from five, missing reports or test failures block the gate. Investigate intent/payload differences separately from installation/emulator errors. No sleeps, rerun-until-green or real contact dependency. Android only; no iOS, physical-device or customer-data claim.
 
 The Actions summary lists every scenario, duration, totals and blocking reason. The gate requires the count configured in the workflow, with no failures or skips; missing or invalid JUnit fails the gate. The summary is also included in the artifact.
+
+Husky: with Node 24 and the stack dependencies installed, run `npm ci` to enable pre-commit. `npm run check:local` checks the diff, report gate and existing type/lint checks. The hook also rejects ignored files in the index. Browser, emulator and API tests remain in CI.

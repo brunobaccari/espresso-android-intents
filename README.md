@@ -35,3 +35,5 @@ O prepare confere o SHA e injeta `src/androidTest/java/ContactIntentsTest.java` 
 Skip, quantidade diferente de cinco, ausência de relatório ou falha reprova o gate. Diferença de intent/payload é investigada separadamente de erro de instalação ou emulador. Sem sleeps, reruns até verde ou dependência de contato real. Escopo Android; sem iOS, aparelho físico ou dados de clientes.
 
 O summary do Actions lista cada cenário, duração, totais e motivo de bloqueio. O gate exige a quantidade prevista no workflow, sem falhas ou skips; JUnit ausente ou inválido reprova. O resumo também acompanha o artifact.
+
+Husky: com Node 24 e as dependências da stack instalados, rode `npm ci` para ativar o pre-commit. `npm run check:local` verifica o diff, o gate dos relatórios e os checks de tipos/lint existentes. O hook também bloqueia arquivos ignorados no índice. Testes que usam navegador, emulador ou API continuam no CI.
