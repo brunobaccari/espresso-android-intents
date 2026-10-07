@@ -33,3 +33,5 @@ O prepare confere o SHA e injeta `src/androidTest/java/ContactIntentsTest.java` 
 [Actions](https://github.com/brunobaccari/espresso-android-intents/actions) compila app e instrumentação, executa os cinco testes e publica summary por caso. O artifact `android-results` guarda XML JUnit e o relatório HTML de instrumentação por 14 dias, inclusive saídas disponíveis quando há falha.
 
 Skip, quantidade diferente de cinco, ausência de relatório ou falha reprova o gate. Diferença de intent/payload é investigada separadamente de erro de instalação ou emulador. Sem sleeps, reruns até verde ou dependência de contato real. Escopo Android; sem iOS, aparelho físico ou dados de clientes.
+
+O summary do Actions lista cada cenário, duração, totais e motivo de bloqueio. O gate exige a quantidade prevista no workflow, sem falhas ou skips; JUnit ausente ou inválido reprova. O resumo também acompanha o artifact.

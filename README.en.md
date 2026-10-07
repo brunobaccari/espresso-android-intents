@@ -33,3 +33,5 @@ Preparation verifies the SHA and injects `src/androidTest/java/ContactIntentsTes
 [Actions](https://github.com/brunobaccari/espresso-android-intents/actions) builds both APKs, runs the five tests and publishes a per-case summary. `android-results` retains JUnit XML and instrumentation HTML for 14 days, including available outputs after failures.
 
 Skipped cases, a count different from five, missing reports or test failures block the gate. Investigate intent/payload differences separately from installation/emulator errors. No sleeps, rerun-until-green or real contact dependency. Android only; no iOS, physical-device or customer-data claim.
+
+The Actions summary lists every scenario, duration, totals and blocking reason. The gate requires the count configured in the workflow, with no failures or skips; missing or invalid JUnit fails the gate. The summary is also included in the artifact.
